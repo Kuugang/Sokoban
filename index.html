@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Grid</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gridCanvas"></canvas>
+
+
+<div>
+    <h1 id = "level">Level</h1>
+    <button onclick="newGame(1)">1</button>
+    <button onclick="newGame(2)">2</button>
+    <button onclick="newGame(3)">3</button>
+    <button onclick="newGame(4)">4</button>
+    <button onclick="newGame(5)">5</button>
+    <button onclick="newGame(6)">6</button>
+    <button onclick="newGame(7)">7</button>
+    <button onclick="newGame(8)">8</button>
+    <button onclick="newGame(9)">9</button>
+    <button onclick="newGame(10)">10</button>
+    <button onclick="newGame(11)">11</button>
+    <button onclick="newGame(12)">12</button>
+    <button onclick="newGame(13)">13</button>
+    <button onclick="newGame(14)">14</button>
+    <button onclick="newGame(15)">15</button>
+</div>
+
+<button onclick="solveBFS()">BFS</button>
+<button onclick="solveDFS()">DFS</button>
+
+<script src = "State.js"></script>
+<script src = "BFS.js"></script>
+<script src = "DFS.js"></script>
+<script src = "levels.js"></script>
+<script src = "index.js"></script>
