@@ -8,6 +8,8 @@ class State {
     }
 
     getStateHash() {
-        return JSON.stringify({ position: this.playerPosition, map: this.map });
+        let hash = `${this.playerPosition.row}-${this.playerPosition.col}-`;
+        hash += this.map.flat().join('');
+        return hash;
     }
 }

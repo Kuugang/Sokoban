@@ -26,37 +26,127 @@ async function loadImages() {
 
 class Game {
     constructor(level, images) {
-        this.level = level;
-        this.images = images;
-        this.canvasWidth = gridSize * level.map[0].length;
-        this.canvasHeight = gridSize * level.map.length;
-        this.player = new Player(level.player.row, level.player.col, images.player, this);
+        this.images = images
+        this.initLevel(level);
+        this.initEventListeners()
+    }
+
+    initLevel(level){
+        this.level = level
+        this.stage = levels[level]
+        this.map = this.stage.map
+
+        this.state = new State(
+            { row: this.stage.player.row, col: this.stage.player.col },
+            this.map.map(row => row.slice()),
+            0
+        )
+        this.player = new Player(this);
+        this.initCanvas(level);
+    }
+
+    initCanvas(level){
+        this.canvasWidth = gridSize * this.map[0].length;
+        this.canvasHeight = gridSize * this.map.length;
         canvas.setAttribute('width', this.canvasWidth);
         canvas.setAttribute('height', this.canvasHeight);
-        this.initEventListeners();
+        document.getElementById('level').innerText = `Level ${level}`;
+        this.drawBoard()
     }
 
     initEventListeners() {
         window.addEventListener('keydown', (event) => this.handleKeyDown(event));
     }
+
     handleKeyDown(event) {
         const moves = {
-            'ArrowUp': [-1, 0],
-            'ArrowDown': [1, 0],
-            'ArrowLeft': [0, -1],
-            'ArrowRight': [0, 1]
+            'ArrowUp': 'up',
+            'ArrowDown': 'down',
+            'ArrowLeft': 'left',
+            'ArrowRight': 'right' 
         };
+
         if (moves[event.key]) {
-            this.player.move(...moves[event.key]);
-            this.drawBoard();
+            let newState = this.player.move(this.state, moves[event.key]);
+            if(newState){
+                this.movePlayer(newState);
+            }
+        }
+        if(event.key === 'u')this.undo()
+        if(event.key === ' '){
+            this.initLevel(this.level)
         }
     }
 
+    movePlayer(newState){
+        this.state = newState
+        this.player.updatePosition(newState.playerPosition)
+        this.drawBoard();
+    }
+
+    undo(){
+        if(this.state.parent){
+            this.state = this.state.parent;
+            this.player.row = this.state.playerPosition.row
+            this.player.col = this.state.playerPosition.col
+            this.drawBoard()
+        }
+    }
+    
+    getRowColMove(direction) {
+        switch (direction) {
+            case "left":
+                return { row: 0, col: -1 };
+            case "right":
+                return { row: 0, col: 1 };
+            case "up":
+                return { row: -1, col: 0 };
+            case "down":
+                return { row: 1, col: 0 };
+        }
+    }
+
+    validateMoves(direction, state){
+        let possible_cells = [0, 2, 3, 4];
+
+        let move = this.getRowColMove(direction);
+
+        let cell = state.map[state.playerPosition.row + move.row][state.playerPosition.col + move.col];
+        if(!possible_cells.includes(cell))return false
+
+        switch (cell) {
+            case 0:
+            case 3:
+                return true;
+            case 2:
+            case 4:
+                const nextRow = state.playerPosition.row + move.row * 2;
+                const nextCol = state.playerPosition.col + move.col * 2;
+                const nextCell = state.map[nextRow][nextCol];
+                if (nextCell === 0 || nextCell === 3) { // Valid move for box
+                    return true
+                }
+            default:
+                return false;
+        }
+    }
+
+    getPossibleDirections(state) {
+        let moves = ['up', 'down', 'left', 'right']
+
+        for (let i = moves.length - 1; i >= 0; i--) {
+            if (!this.validateMoves(moves[i], state)) {
+                moves.splice(i, 1);
+            }
+        }
+        return moves;
+    }
+        
     drawBoard() {
         context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        for (let row = 0; row < this.level.map.length; row++) {
-            for (let col = 0; col < this.level.map[row].length; col++) {
-                const cell = this.level.map[row][col];
+        for (let row = 0; row < this.state.map.length; row++) {
+            for (let col = 0; col < this.state.map[row].length; col++) {
+                const cell = this.state.map[row][col];
                 switch (cell) {
                     case 0:
                         context.drawImage(this.images.floor, col * gridSize, row * gridSize, gridSize, gridSize);
@@ -76,87 +166,74 @@ class Game {
                 }
             }
         }
+        this.player.image = this.state.map[this.state.playerPosition.row][this.state.playerPosition.col] == 3 ? this.images.playerOnGoal : this.images.player
         this.player.draw();
-        if (this.isWin()) {
+        if (this.stateIsWin(this.state)) {
             alert('You win!')
         }
     }
 
-    isWin() {
-        let isWin = true;
-        for (let row = 0; row < this.level.map.length; row++) {
-            for (let col = 0; col < this.level.map[row].length; col++) {
-                if (this.level.map[row][col] === 3) {
-                    isWin = false;
-                    break;
-                }
-            }
-        }
-        return isWin;
-    }
-
     stateIsWin(state) {
-        let isWin = true;
         for (let row = 0; row < state.map.length; row++) {
             for (let col = 0; col < state.map[row].length; col++) {
                 if (state.map[row][col] === 3) {
-                    isWin = false;
-                    break;
+                    return false
                 }
             }
         }
-        return isWin;
+        return true;
     }
 }
 
 class Player {
-    constructor(row, col, image, game) {
-        this.row = row;
-        this.col = col;
-        this.image = image;
+    constructor(game) {
+        this.row = game.state.playerPosition.row;
+        this.col = game.state.playerPosition.col;
+        this.image = game.images.player;
         this.game = game
     }
 
-    move(rowDelta, colDelta) {
-        const cell = this.game.level.map[this.row + rowDelta][this.col + colDelta];
+    move(state, direction) {
+        let rowColMove = this.game.getRowColMove(direction);
+        const playerRow = state.playerPosition.row;
+        const playerCol = state.playerPosition.col;
+
+        const cell = state.map[playerRow + rowColMove.row][playerCol + rowColMove.col];
+
+        const newPos = { 
+            row: playerRow + rowColMove.row, 
+            col: playerCol + rowColMove.col 
+        };
+
         switch (cell) {
-            case 0:
-                this.image = this.game.images.player;
-                this.updatePosition(rowDelta, colDelta);
-                break;
-            case 2:
-            case 4:
-                const nextCell = this.game.level.map[this.row + rowDelta * 2][this.col + colDelta * 2];
-                if (nextCell === 0 || nextCell === 3) {
-                    this.updatePosition(rowDelta, colDelta);
+            case 0: // FLOOR
+            case 3: // GOAL
+                return new State(newPos, state.map, state.moves + 1, state, direction);
+            case 2: // BOX
+            case 4: // BOX ON TOP OF GOAL
+                const nextRow = newPos.row + rowColMove.row;
+                const nextCol = newPos.col + rowColMove.col;
+                const nextCell = state.map[nextRow][nextCol];
 
-                    if (cell == 4) {
-                        this.game.level.map[this.row][this.col] = 3;
-
-                        this.image = this.game.images.playerOnGoal;
+                if (nextCell === 0 || nextCell === 3) { // VALID MOVE FOR BOX
+                    let map = state.map.map(row => row.slice());
+                    if (cell === 4) {
+                        map[newPos.row][newPos.col] = 3;
                     } else {
-                        this.game.level.map[this.row][this.col] = 0;
-
-                        this.image = this.game.images.player;
+                        map[newPos.row][newPos.col] = 0;
                     }
-
-                    this.game.level.map[this.row + rowDelta * 1][this.col + colDelta * 1] = 2;
-
-                    if (nextCell === 3) {
-                        this.game.level.map[this.row + rowDelta * 1][this.col + colDelta * 1] = 4;
-                    }
+                    map[nextRow][nextCol] = (nextCell === 3) ? 4 : 2; 
+                    return new State(newPos, map, state.moves + 1, state, direction);
                 }
                 break;
-            case 3:
-                this.image = this.game.images.playerOnGoal;
-                this.updatePosition(rowDelta, colDelta);
-                break;
+            default:
+                return null;
         }
     }
 
-    updatePosition(rowDelta, colDelta) {
-        this.row += rowDelta;
-        this.col += colDelta;
+    updatePosition(position) {
+        this.row = position.row;
+        this.col = position.col;
     }
 
     draw() {
@@ -165,27 +242,32 @@ class Player {
 }
 
 let game;
+let bfs, dfs, idfs;
 
 async function newGame(level){
     const images = await loadImages();
-    game = new Game(JSON.parse(JSON.stringify(levels[level])), images);
-    game.drawBoard();
-    document.getElementById('level').innerText = `Level ${level}`;
+    game = new Game(level, images);
+    
+    bfs = new BFS(game);
+    dfs = new DFS(game);
+    idfs = new IDFS(game);
 }
 
 function solveBFS(){
-    let bfs = new BFS(game);
-
     setTimeout(() => {
-        bfs.solveBFS();
+        bfs.solve();
     }, 0);
 }
 
 function solveDFS(){
-    let bfs = new DFS(game);
-
     setTimeout(() => {
-        bfs.solveDFS();
+        dfs.solve();
+    }, 0);
+}
+
+function solveIDFS(){
+    setTimeout(() => {
+        idfs.solve();
     }, 0);
 }
 

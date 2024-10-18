@@ -14,31 +14,43 @@
 
 <canvas id="gridCanvas"></canvas>
 
+<div>
+    <p>
+        Press space to restart
+    </p>
+    <p>
+        Press u to undo move
+    </p>
+</div>
 
 <div>
     <h1 id = "level">Level</h1>
-    <button onclick="newGame(1)">1</button>
-    <button onclick="newGame(2)">2</button>
-    <button onclick="newGame(3)">3</button>
-    <button onclick="newGame(4)">4</button>
-    <button onclick="newGame(5)">5</button>
-    <button onclick="newGame(6)">6</button>
-    <button onclick="newGame(7)">7</button>
-    <button onclick="newGame(8)">8</button>
-    <button onclick="newGame(9)">9</button>
-    <button onclick="newGame(10)">10</button>
-    <button onclick="newGame(11)">11</button>
-    <button onclick="newGame(12)">12</button>
-    <button onclick="newGame(13)">13</button>
-    <button onclick="newGame(14)">14</button>
-    <button onclick="newGame(15)">15</button>
+    <p id ="path"></p>
+    <button onclick="game.initLevel(1)">1</button>
+    <button onclick="game.initLevel(2)">2</button>
+    <button onclick="game.initLevel(3)">3</button>
+    <button onclick="game.initLevel(4)">4</button>
+    <button onclick="game.initLevel(5)">5</button>
+    <button onclick="game.initLevel(6)">6</button>
+    <button onclick="game.initLevel(7)">7</button>
+    <button onclick="game.initLevel(8)">8</button>
+    <button onclick="game.initLevel(9)">9</button>
+    <button onclick="game.initLevel(10)">10</button>
+    <button onclick="game.initLevel(11)">11</button>
+    <button onclick="game.initLevel(12)">12</button>
+    <button onclick="game.initLevel(13)">13</button>
+    <button onclick="game.initLevel(14)">14</button>
+    <button onclick="game.initLevel(15)">15</button>
 </div>
 
 <button onclick="solveBFS()">BFS</button>
 <button onclick="solveDFS()">DFS</button>
+<button onclick="solveIDFS()">IDFS</button>
 
 <script src = "State.js"></script>
 <script src = "BFS.js"></script>
 <script src = "DFS.js"></script>
+<script src = "IDFS.js"></script>
+
 <script src = "levels.js"></script>
 <script src = "index.js"></script>
