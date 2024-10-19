@@ -9,7 +9,7 @@ class IDFS {
         let depth = 0;
         let initialState = new State(
             { row: this.game.player.row, col: this.game.player.col },
-            this.game.state.map.map(row => row.slice()),
+            this.game.findBoxesAndGoals(JSON.parse(JSON.stringify(this.game.stage.map))).boxes,
             0
         );
 
@@ -57,9 +57,8 @@ class IDFS {
         }
 
         visited.add(state.getStateHash());
-        let possibleDirections = this.game.getPossibleDirections(state);
 
-        for (let direction of possibleDirections) {
+        for (let direction of this.game.directions) {
             let newState = this.game.player.move(state, direction);
             if (newState != null && !visited.has(newState.getStateHash())) {
                 if (this.depthLimitedSearch(newState, depth - 1, visited)) {

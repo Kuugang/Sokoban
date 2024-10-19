@@ -1,7 +1,7 @@
 class State {
-    constructor(playerPosition, map, moves, parent = null, direction = null) {
+    constructor(playerPosition, boxes, moves, parent = null, direction = null) {
         this.playerPosition = playerPosition;
-        this.map = map;
+        this.boxes = boxes;
         this.moves = moves;
         this.parent = parent;
         this.direction = direction;
@@ -9,7 +9,12 @@ class State {
 
     getStateHash() {
         let hash = `${this.playerPosition.row}-${this.playerPosition.col}-`;
-        hash += this.map.flat().join('');
+
+        const sortedBoxes = this.boxes
+            .map(box => `${box.row}-${box.col}`)
+            .sort();
+
+        hash += sortedBoxes.join('-');
         return hash;
     }
 }
