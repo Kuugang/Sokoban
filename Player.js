@@ -14,8 +14,8 @@ class Player {
         let map = JSON.parse(JSON.stringify(this.game.map));
         map = this.game.putBoxesOnMap(map, state.boxes);
 
-
         if (this.game.checkDeadlock && this.game.isDeadlock(map, state.boxes)) {
+            if(this.game.isSolving == false)alert("Deadlock!")
             return null;
         }
 

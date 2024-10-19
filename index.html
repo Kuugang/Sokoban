@@ -43,11 +43,11 @@
     <button onclick="game.initLevel(15)">15</button>
 </div>
 
-<button onclick="solveBFS()">BFS</button>
-<button onclick="solveDFS()">DFS</button>
-<button onclick="solveIDFS()">IDFS</button>
+<button onclick="solve('bfs')">BFS</button>
+<button onclick="solve('dfs')">DFS</button>
+<button onclick="solve('idfs')">IDFS</button>
 
-<input id = "checkbox-deadlock" onchange="game.toggleCheckDeadlock()" type = "checkbox">Check Deadlock</input>
+<input id = "checkbox-deadlock" onchange="game.toggleCheckDeadlock()" type = "checkbox" checked>Check Deadlock</input>
 
 <script src = "State.js"></script>
 <script src = "BFS.js"></script>

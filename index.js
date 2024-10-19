@@ -36,22 +36,21 @@ async function newGame(level) {
     idfs = new IDFS(game);
 }
 
-function solveBFS() {
-    setTimeout(() => {
-        bfs.solve();
-    }, 0);
-}
 
-function solveDFS() {
-    setTimeout(() => {
-        dfs.solve();
-    }, 0);
-}
-
-function solveIDFS() {
-    setTimeout(() => {
-        idfs.solve();
-    }, 0);
+function solve(algorithm) {
+    game.isSolving = true
+    switch (algorithm) {
+        case 'bfs':
+            bfs.solve();
+            break;
+        case 'dfs':
+            dfs.solve();
+            break;
+        case 'idfs':
+            idfs.solve();
+            break;
+    }
+    game.isSolving = false
 }
 
 newGame(1);

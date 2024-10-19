@@ -5,6 +5,7 @@ class Game {
         this.initLevel(level);
         this.initEventListeners()
         this.directions = ['up', 'down', 'left', 'right']
+        this.isSolving = false;
     }
 
     toggleCheckDeadlock(){
@@ -49,10 +50,6 @@ class Game {
         };
 
         if (moves[event.key]) {
-            if(this.checkDeadlock && this.isDeadlock(this.map, this.state.boxes)){
-                alert('Deadlock!')
-                return
-            }
             let newState = this.player.move(this.state, moves[event.key]);
             if (newState) {
                 this.movePlayer(newState);
@@ -65,7 +62,14 @@ class Game {
     }
 
     movePlayer(newState) {
+        let oldState = this.state
         this.state = newState
+
+        if(this.state.boxes !== oldState.boxes){
+            if (this.stateIsWin(this.state)) {
+                alert('You win!')
+            }
+        }
         this.player.updatePosition(newState.playerPosition)
         this.drawBoard();
     }
@@ -94,7 +98,6 @@ class Game {
 
     drawBoard() {
         context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-
 
         for (let row = 0; row < this.map.length; row++) {
             for (let col = 0; col < this.map[row].length; col++) {
@@ -127,9 +130,6 @@ class Game {
 
         this.player.image = this.map[this.state.playerPosition.row][this.state.playerPosition.col] == 3 ? this.images.playerOnGoal : this.images.player
         this.player.draw();
-        if (this.stateIsWin(this.state)) {
-            alert('You win!')
-        }
     }
 
     stateIsWin(state) {
@@ -184,24 +184,26 @@ class Game {
 
     isDeadlock(map, boxes) {
         for (let box of boxes) {
+            let currentCell = map[box.row][box.col]
             if (
-                (map[box.row - 1][box.col] === 1 && map[box.row][box.col - 1] === 1 && map[box.row][box.col] !== 4) || // TOP LEFT
-                (map[box.row + 1][box.col] === 1 && map[box.row][box.col + 1] === 1 && map[box.row][box.col] !== 4) || // BOTTOM RIGHT
-                (map[box.row - 1][box.col] === 1 && map[box.row][box.col + 1] === 1 && map[box.row][box.col] !== 4) || // TOP RIGHT
-                (map[box.row + 1][box.col] === 1 && map[box.row][box.col - 1] === 1 && map[box.row][box.col] !== 4) // BOTTOM LEFT
+                (map[box.row - 1][box.col] === 1 && map[box.row][box.col - 1] === 1 && (currentCell !== 4) )|| // TOP LEFT
+                (map[box.row + 1][box.col] === 1 && map[box.row][box.col + 1] === 1 && (currentCell !== 4) )|| // BOTTOM RIGHT
+                (map[box.row - 1][box.col] === 1 && map[box.row][box.col + 1] === 1 && (currentCell !== 4) )|| // TOP RIGHT
+                (map[box.row + 1][box.col] === 1 && map[box.row][box.col - 1] === 1 && (currentCell !== 4) )// BOTTOM LEFT
             ) {
                 return true;
             }
         }
 
         for(let box of boxes){
-            let right = true
-            let left = true
-            let up = true
-            let down = true
+            let right = false
+            let left = false
+            let up = false
+            let down = false
 
             // RIGHT
             if(box.col + 1 < map[0].length){
+                right = true
                 for(let i = 0; i < map.length; i++){
                     if(map[i][box.col + 1] === 0 || map[i][box.col + 1] === 3){
                         right = false;
@@ -210,7 +212,8 @@ class Game {
                 }
             }
             //LEFT
-            if(box.col - 1 >= 0){
+            if(box.col - 1 <= 0){
+                left = true
                 for(let i = 0; i < map.length; i++){
                     if(map[i][box.col - 1] === 0 || map[i][box.col - 1] === 3){
                         left = false;
@@ -221,6 +224,7 @@ class Game {
             
             //UP
             if(box.row - 1 >= 0){
+                up = true
                 for(let i = 0; i < map[0].length; i++){
                     if(map[box.row - 1][i] === 0 || map[box.row - 1][i] === 3){
                         up = false;
@@ -231,6 +235,7 @@ class Game {
 
             //DOWN
             if(box.row + 1 < map.length){
+                down = true
                 for(let i = 0; i < map[0].length; i++){
                     if(map[box.row + 1][i] === 0 || map[box.row + 1][i] === 3){
                         down = false;
@@ -238,8 +243,9 @@ class Game {
                     }
                 }
             }
-
+            // console.log(up,down, left, right)
             let result = right ^ left ^ up ^ down
+            // console.log(result)
             if(result) return true
         }
     }
