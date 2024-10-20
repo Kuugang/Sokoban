@@ -205,7 +205,7 @@ class Game {
             if(box.col + 1 < map[0].length){
                 right = true
                 for(let i = 0; i < map.length; i++){
-                    if(map[i][box.col + 1] === 0 || map[i][box.col + 1] === 3){
+                    if(map[i][box.col + 1] === 0 || map[i][box.col + 1] === 3  || map[box.row][box.col] === 4){
                         right = false;
                         break;
                     }
@@ -215,7 +215,7 @@ class Game {
             if(box.col - 1 <= 0){
                 left = true
                 for(let i = 0; i < map.length; i++){
-                    if(map[i][box.col - 1] === 0 || map[i][box.col - 1] === 3){
+                    if(map[i][box.col - 1] === 0 || map[i][box.col - 1] === 3  || map[box.row][box.col] === 4){
                         left = false;
                         break;
                     }
@@ -226,7 +226,7 @@ class Game {
             if(box.row - 1 >= 0){
                 up = true
                 for(let i = 0; i < map[0].length; i++){
-                    if(map[box.row - 1][i] === 0 || map[box.row - 1][i] === 3){
+                    if(map[box.row - 1][i] === 0 || map[box.row - 1][i] === 3 || map[box.row][box.col] === 4 ){
                         up = false;
                         break;
                     }
@@ -237,7 +237,7 @@ class Game {
             if(box.row + 1 < map.length){
                 down = true
                 for(let i = 0; i < map[0].length; i++){
-                    if(map[box.row + 1][i] === 0 || map[box.row + 1][i] === 3){
+                    if(map[box.row + 1][i] === 0 || map[box.row + 1][i] === 3 || map[box.row][box.col] === 4){
                         down = false;
                         break;
                     }
