@@ -7,10 +7,6 @@ class Player {
     }
 
     move(state, direction) {
-        let rowColMove = this.game.getRowColMove(direction);
-        const playerRow = state.playerPosition.row;
-        const playerCol = state.playerPosition.col;
-
         let map = JSON.parse(JSON.stringify(this.game.map));
         map = this.game.putBoxesOnMap(map, state.boxes);
 
@@ -19,34 +15,44 @@ class Player {
             return null;
         }
 
-        const cell = map[playerRow + rowColMove.row][playerCol + rowColMove.col];
+        let rowColMove = this.game.getRowColMove(direction);
+        // up = -1, 0
+        // down = 1, 0
+        // left = 0, -1 
+        // right = 0, 1
 
-        const newPos = {
+        const playerRow = state.playerPosition.row;
+        const playerCol = state.playerPosition.col;
+
+        const positionDelta = {
             row: playerRow + rowColMove.row,
             col: playerCol + rowColMove.col
         };
 
+        const cell = map[positionDelta.row][positionDelta.col];
+
+        // 0 = FLOOR 
+        // 1 = WALL
+        // 2 = BOX
+        // 3 = GOAL
+        // 4 = BOX ON TOP OF GOAL
         switch (cell) {
             case 0: // FLOOR
             case 3: // GOAL
-                return new State(newPos, state.boxes, state.moves + 1, state, direction);
+                return new State(positionDelta, state.boxes, state.moves + 1, state, direction);
             case 2: // BOX
             case 4: // BOX ON TOP OF GOAL
-                const nextRow = newPos.row + rowColMove.row;
-                const nextCol = newPos.col + rowColMove.col;
+                const nextRow = positionDelta.row + rowColMove.row;
+                const nextCol = positionDelta.col + rowColMove.col;
                 const nextCell = map[nextRow][nextCol];
 
                 if (nextCell === 0 || nextCell === 3) { // VALID MOVE FOR BOX
-                    if (cell === 4) {
-                        map[newPos.row][newPos.col] = 3;
-                    } else {
-                        map[newPos.row][newPos.col] = 0;
-                    }
                     map[nextRow][nextCol] = (nextCell === 3) ? 4 : 2;
+                    map[positionDelta.row][positionDelta.col] = (cell === 4) ? 3 : 0;
                     let { boxes } = this.game.findBoxesAndGoals(map)
-                    return new State(newPos, boxes, state.moves + 1, state, direction);
+                    return new State(positionDelta, boxes, state.moves + 1, state, direction);
                 }
-                break;
+                return null
             default:
                 return null;
         }

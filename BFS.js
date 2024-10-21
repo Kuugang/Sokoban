@@ -38,7 +38,7 @@ class BFS {
                     if (index < moves.length) {
                         state = this.game.player.move(state, moves[index]);
                         if (state !== null) {
-                            this.game.movePlayer(state);
+                            this.game.movePlayer(state.direction);
                         }
                         index++;
                     } else {
@@ -47,8 +47,6 @@ class BFS {
                 }, 50);
                 return;
             }
-
-
             this.game.directions.forEach(direction => {
                 let newState = this.game.player.move(currentState, direction);
                 if (newState != null && !visited.has(newState.getStateHash())) {
